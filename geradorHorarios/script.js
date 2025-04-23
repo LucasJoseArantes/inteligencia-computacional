@@ -63,6 +63,7 @@ function avaliacao(individuo) {
   return totalConflitos;
 }
 
+
 function gerarPopulacaoComCodigos(periodos, tamPop = 10) {
   const populacao = [];
 
@@ -117,12 +118,14 @@ function renderTabela(populacao) {
   html += '</tr></thead><tbody>';
 
   populacao.forEach((ind, i) => {
-    html += `<tr><td><b>${i + 1}</b></td>`;
     const nota = avaliacao(ind);
+    html += `<tr><td><b>${i + 1}</b></td>`;
     html += `<td>${nota}</td>`;
 
-    ind.forEach(cod => {
 
+
+
+    ind.forEach(cod => {
       const codDisc = cod.substring(0, 2);
       const codProf = cod.substring(2);
       const nomeDisc = materias[codDisc] || "??";
@@ -138,4 +141,5 @@ function renderTabela(populacao) {
 
 
 const populacao = gerarPopulacaoComCodigos(periodos, 10);
+populacao.sort((a, b) => avaliacao(a) - avaliacao(b));
 renderTabela(populacao);
