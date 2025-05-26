@@ -1,14 +1,42 @@
 const materias = {
-  "01": "Matemática", "02": "Português", "03": "História", "04": "Geografia", "05": "Biologia",
-  "06": "Física", "07": "Química", "08": "Filosofia", "09": "Sociologia", 10: "Artes",
-  11: "Ed. Física", 12: "Redação", 13: "Inglês", 14: "Espanhol", 15: "Literatura",
-  16: "TI", 17: "Banco de Dados", 18: "Programação", 19: "Algoritmos", 20: "Web",
-  21: "Projeto", 22: "Estágio", 23: "Empreendedorismo", 24: "Ética", 25: "Inovação"
+  "01": "Matemática",
+  "02": "Português",
+  "03": "História",
+  "04": "Geografia",
+  "05": "Biologia",
+  "06": "Física",
+  "07": "Química",
+  "08": "Filosofia",
+  "09": "Sociologia",
+  10: "Artes",
+  11: "Ed. Física",
+  12: "Redação",
+  13: "Inglês",
+  14: "Espanhol",
+  15: "Literatura",
+  16: "TI",
+  17: "Banco de Dados",
+  18: "Programação",
+  19: "Algoritmos",
+  20: "Web",
+  21: "Projeto",
+  22: "Estágio",
+  23: "Empreendedorismo",
+  24: "Ética",
+  25: "Inovação",
 };
 
 const professores = {
-  "01": "Prof. Ana", "02": "Prof. Bruno", "03": "Prof. Carla", "04": "Prof. Daniel", "05": "Prof. Elisa",
-  "06": "Prof. Felipe", "07": "Prof. Gabriela", "08": "Prof. Henrique", "09": "Prof. Isabela", 10: "Prof. João"
+  "01": "Prof. Ana",
+  "02": "Prof. Bruno",
+  "03": "Prof. Carla",
+  "04": "Prof. Daniel",
+  "05": "Prof. Elisa",
+  "06": "Prof. Felipe",
+  "07": "Prof. Gabriela",
+  "08": "Prof. Henrique",
+  "09": "Prof. Isabela",
+  10: "Prof. João",
 };
 
 const periodos = [
@@ -16,7 +44,7 @@ const periodos = [
   ["0606", "0707", "0808", "0909", "1010"],
   ["0111", "0212", "0313", "0414", "0515"],
   ["0616", "0717", "0818", "0919", "1020"],
-  ["0121", "0222", "0323", "0424", "0525"]
+  ["0121", "0222", "0323", "0424", "0525"],
 ];
 
 function shuffle(array) {
@@ -43,7 +71,10 @@ function avaliacao(individuo) {
       if (!professoresNoHorario.has(codProf)) {
         professoresNoHorario.set(codProf, 1);
       } else {
-        professoresNoHorario.set(codProf, professoresNoHorario.get(codProf) + 1);
+        professoresNoHorario.set(
+          codProf,
+          professoresNoHorario.get(codProf) + 1
+        );
       }
     }
 
@@ -64,22 +95,64 @@ function avaliacao(individuo) {
 
 function selecao(populacao, notas) {
   const selecionados = [];
-  const somaNotas = notas.reduce((a, b) => a + b, 0);
+  const tam = populacao.length;
+  const metade = Math.floor(tam / 2);
 
-  for (let i = 0; i < populacao.length; i++) {
-    const r = Math.random() * somaNotas;
-    let acumulado = 0;
+  // Selecionar o primeiro pai da metade melhor da população (seleção por roleta nessa metade)
+  const notasMelhorMetade = notas.slice(0, metade);
+  const somaNotasMelhor = notasMelhorMetade.reduce((a, b) => a + b, 0);
+  let r = Math.random() * somaNotasMelhor;
+  let acumulado = 0;
+  for (let i = 0; i < metade; i++) {
+    acumulado += notasMelhorMetade[i];
+    if (acumulado >= r) {
+      selecionados.push(populacao[i]);
+      break;
+    }
+  }
 
-    for (let j = 0; j < populacao.length; j++) {
-      acumulado += notas[j];
-      if (acumulado >= r) {
-        selecionados.push(populacao[j]);
-        break;
-      }
+  // Selecionar o segundo pai da população inteira (seleção por roleta)
+  const somaNotasTotal = notas.reduce((a, b) => a + b, 0);
+  r = Math.random() * somaNotasTotal;
+  acumulado = 0;
+  for (let i = 0; i < tam; i++) {
+    acumulado += notas[i];
+    if (acumulado >= r) {
+      selecionados.push(populacao[i]);
+      break;
     }
   }
 
   return selecionados;
+}
+
+function cruzamento(pai1, pai2, pc = 1) {
+  const tamanho = pai1.length;
+  if (Math.random() > pc) return [[...pai1], [...pai2]];
+
+  const pontoCorte = Math.floor(Math.random() * (tamanho - 1)) + 1;
+
+  const filho1 = [...pai1.slice(0, pontoCorte), ...pai2.slice(pontoCorte)];
+  const filho2 = [...pai2.slice(0, pontoCorte), ...pai1.slice(pontoCorte)];
+
+  return [filho1, filho2];
+}
+
+function mutacao(individuo, pm = 0.01) {
+  const tamanho = individuo.length;
+  const novoIndividuo = [...individuo];
+
+  for (let i = 0; i < tamanho; i++) {
+    if (Math.random() < pm) {
+      const j = Math.floor(Math.random() * tamanho);
+      [novoIndividuo[i], novoIndividuo[j]] = [
+        novoIndividuo[j],
+        novoIndividuo[i],
+      ];
+    }
+  }
+
+  return novoIndividuo;
 }
 
 function gerarPopulacaoComCodigos(periodos, tamPop = 10) {
@@ -115,7 +188,7 @@ function renderTabela(populacao, idDiv, titulo) {
   const periodosTotais = 5;
 
   let html = `<h2>${titulo}</h2>`;
-  html += "<table><thead><tr>";
+  html += "<table border='1' cellpadding='4' cellspacing='0'><thead><tr>";
   html += '<th rowspan="2">Indivíduo</th>';
   html += '<th rowspan="2">Nota</th>';
 
@@ -155,15 +228,29 @@ function renderTabela(populacao, idDiv, titulo) {
   document.getElementById(idDiv).innerHTML = html;
 }
 
-// 🚀 Geração da População
+// --- Fluxo principal ---
+
 const populacao = gerarPopulacaoComCodigos(periodos, 10);
 const notas = populacao.map(avaliacao);
 const selecionados = selecao(populacao, notas);
 
-// Ordenar por melhor nota (menos conflitos)
+// Ordenar para exibição: melhor nota primeiro (menos conflitos)
 populacao.sort((a, b) => avaliacao(a) - avaliacao(b));
 selecionados.sort((a, b) => avaliacao(a) - avaliacao(b));
 
-// Renderização das Tabelas
+// Cruzamento entre os dois selecionados
+const [filho1, filho2] = cruzamento(selecionados[0], selecionados[1], 1);
+const populacaoCruzada = [filho1, filho2];
+
+// Mutação na população cruzada
+const populacaoMutada = populacaoCruzada.map((ind) => mutacao(ind, 0.01));
+
+// Renderização das tabelas
 renderTabela(populacao, "tabela-populacao", "População Inicial");
 renderTabela(selecionados, "tabela-selecionados", "Indivíduos Selecionados");
+renderTabela(
+  populacaoCruzada,
+  "tabela-cruzamento",
+  "População após Cruzamento"
+);
+renderTabela(populacaoMutada, "tabela-mutacao", "População após Mutação");
