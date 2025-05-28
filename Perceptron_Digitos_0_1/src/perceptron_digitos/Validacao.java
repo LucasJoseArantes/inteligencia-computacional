@@ -1,54 +1,43 @@
 package perceptron_digitos;
-/**
- *
- * @author Clarimundo
- */
+
 public class Validacao {
-    
-    public Validacao(){
-        
+
+    public Validacao() {
     }
-    
-    public double somatorio(int mat[][], double w[]){
-        
-        double yent=0;  
-        double entrada[] = new double[16];
-        int l=1;
-        entrada[0]=1;
-        for(int i=0; i<5; i++)
-            for(int j=0; j<3; j++){
-                entrada[l] = mat[i][j];
-                l++;
-            }        
-        for(int j=0;j<16;j++)
-            yent = yent + entrada[j]*w[j];
+
+    public double somatorio(int[][] mat, double[] w) {
+        double yent = 0;
+        double[] entrada = new double[16];
+        int l = 0;
+        for (int i = 0; i < 5; i++)
+            for (int j = 0; j < 3; j++)
+                entrada[l++] = mat[i][j];
+        entrada[l] = 1; // bias (posição 15)
+
+        for (int i = 0; i < 16; i++)
+            yent += entrada[i] * w[i];
+
         return yent;
     }
 
-    public double saida(double yent, double limiar){
-        double f;
-        
-        if(yent > limiar)
-            f = 1;
-        else 
-            if(yent < -limiar)
-                f = -1;          
-            else
-                f = 0;
-        return f;
+    public double saida(double yent, double limiar) {
+        if (yent > limiar)
+            return 1;
+        if (yent < -limiar)
+            return -1;
+        return 0;
     }
-    
-    public String teste(int mat[][], double w[], double t[], double limiar){
-              
-       double yent = somatorio(mat,w);
-       double f = saida(yent,limiar);
-       if(f==t[0])
-           return "0";
-       else
-           if(f==t[1])
-               return "1";
-           else
-               return "?";             
-    }             
-    
+
+    public String teste(int[][] mat, double[][] w, double[][] t, double limiar) {
+        for (int i = 0; i < w.length; i++) {
+            double yent = somatorio(mat, w[i]);
+            double f = saida(yent, limiar);
+            // Supondo que a saída esperada para cada perceptron i esteja em t[i][0]
+            if (f == t[i][i]) {
+                return String.valueOf(i);
+            }
+        }
+        return "?";
+    }
+
 }
